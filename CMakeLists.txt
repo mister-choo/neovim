@@ -11,6 +11,26 @@ cmake_minimum_required(VERSION 3.16)
 
 project(nvim C)
 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
+set(BUILD_SHARED_LIBS OFF)
+
+if(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -march=native")
+    if(ENABLE_LTO)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -flto")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+    endif()
+endif()
+
+list(APPEND DEPS_CMAKE_ARGS 
+    -DCMAKE_C_FLAGS="-O3 -march=native ${CMAKE_C_FLAGS}"
+    -DCMAKE_BUILD_TYPE=Release
+    -DBUILD_SHARED_LIBS=OFF)
+
+if(ENABLE_LTO)
+    list(APPEND DEPS_CMAKE_ARGS -DCMAKE_C_FLAGS="-flto ${CMAKE_C_FLAGS}")
+endif()
+
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
